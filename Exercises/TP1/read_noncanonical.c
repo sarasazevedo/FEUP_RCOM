@@ -21,7 +21,7 @@
 
 #define BUF_SIZE 5
 
-#define flag 0x7E
+#define FLAG 0x7E
 #define A_SENDER 0x03
 #define A_RECEIVER 0x01
 #define UA 0x07
@@ -99,8 +99,8 @@ int main(int argc, char *argv[])
 
     while (STOP == FALSE)
     {
-        if(buf[0] == flag && buf[1] == A_SENDER && buf[2] == SET && buf[3] == (A_SENDER ^ SET) && buf[4] == flag){
-            STOP == TRUE;
+        if(buf[0] == FLAG && buf[1] == A_SENDER && buf[2] == SET && buf[3] == (A_SENDER ^ SET) && buf[4] == FLAG){
+            STOP = TRUE;
         }
 
         // Returns after 5 chars have been input
@@ -113,13 +113,13 @@ int main(int argc, char *argv[])
     }
 
     unsigned char buf_send[BUF_SIZE] = {0};
-    buf_send[0] = flag;
+    buf_send[0] = FLAG;
     buf_send[1] = A_RECEIVER;
     buf_send[2] = UA;
     buf_send[3] = A_RECEIVER ^ UA;
-    buf_send[4] = flag;
+    buf_send[4] = FLAG;
 
-    int bytes = write(fd, buf, BUF_SIZE);
+    int bytes = write(fd, buf_send, BUF_SIZE);
     printf("%d bytes written\n", bytes);
 
     // The while() cycle should be changed in order to respect the specifications

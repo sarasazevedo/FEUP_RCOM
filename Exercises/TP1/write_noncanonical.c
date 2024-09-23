@@ -19,7 +19,13 @@
 #define FALSE 0
 #define TRUE 1
 
-#define BUF_SIZE 256
+#define BUF_SIZE 5
+
+#define FLAG 0x7E
+#define A_SENDER 0x03    
+#define A_RECEIVER 0x01  
+#define SET 0x03         
+#define UA 0x07
 
 volatile int STOP = FALSE;
 
@@ -92,10 +98,12 @@ int main(int argc, char *argv[])
     // Create string to send
     unsigned char buf[BUF_SIZE] = {0};
 
+    /*
     for (int i = 0; i < BUF_SIZE; i++)
     {
         buf[i] = 'a' + i % 26;
     }
+    */
 
     // In non-canonical mode, '\n' does not end the writing.
     // Test this condition by placing a '\n' in the middle of the buffer.
