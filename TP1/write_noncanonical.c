@@ -108,10 +108,36 @@ int main(int argc, char *argv[])
     // In non-canonical mode, '\n' does not end the writing.
     // Test this condition by placing a '\n' in the middle of the buffer.
     // The whole buffer must be sent even with the '\n'.
-    buf[5] = '\n';
+    buf[0] = FLAG;
+    buf[1] = A_SENDER;
+    buf[2] = SET;
+    buf[3] = A_SENDER ^ SET;
+    buf[4] = FLAG;
 
     int bytes = write(fd, buf, BUF_SIZE);
     printf("%d bytes written\n", bytes);
+    memdump(buf,5);
+    printf(")\n");
+
+    printf("Waiting for UA frame...\n");
+    bytes = read(fd, buf, 5);
+
+    printf("UA frame received: ");
+    memdump(buf,5);
+    putchar('\n');
+
+    char expected[5] = {FLAG, A_SENDER, UA, A_SENDER ^ UA, FLAG};
+    printf("Expected frame: ");
+    for(size_t i = 0; i < BUF_SIZE; ++i){
+        printf("%02x ", expected[i]);
+    }
+    putchar('\n');
+
+    if(memcmp(buf, expected, 5)){
+        printf("UA frame received not equal to expected\n");
+        return 1;
+    }
+    
 
     // Wait until all bytes have been written to the serial port
     sleep(1);

@@ -99,28 +99,42 @@ int main(int argc, char *argv[])
 
     while (STOP == FALSE)
     {
-        if(buf[0] == FLAG && buf[1] == A_SENDER && buf[2] == SET && buf[3] == (A_SENDER ^ SET) && buf[4] == FLAG){
+        int bytes = read(fd,buf,BUF_SIZE);
+        printf("Flag = 0x%02X\n", buf[0]);
+        printf("Address = 0x%02X\n", buf[1]);
+        printf("Control = 0x%02X\n", buf[2]);
+        printf("BCC1 = 0x%02X\n", buf[3]);
+        printf("Flg = 0x%02X\n", buf[4]);
+
+        if(buf[0] == FLAG && buf[1] == A_RECEIVER && buf[2] == SET && buf[3] == (A_RECEIVER ^ SET) && buf[4] == FLAG){
             STOP = TRUE;
         }
 
         // Returns after 5 chars have been input
-        int bytes = read(fd, buf, BUF_SIZE);
-        buf[bytes] = '\0'; // Set end of string to '\0', so we can printf
+        //int bytes = read(fd, buf, BUF_SIZE);
+        //buf[bytes] = '\0'; // Set end of string to '\0', so we can printf
 
-        printf(":%s:%d\n", buf, bytes);
-        if (buf[0] == 'z')
-            STOP = TRUE;
+        //printf(":%s:%d\n", buf, bytes);
+        //if (buf[0] == 'z')
+        //    STOP = TRUE;
     }
 
+    sleep(1);
+
+    //Asnwer to receiver
+    
     unsigned char buf_send[BUF_SIZE] = {0};
     buf_send[0] = FLAG;
-    buf_send[1] = A_RECEIVER;
+    buf_send[1] = A_SENDER;
     buf_send[2] = UA;
-    buf_send[3] = A_RECEIVER ^ UA;
+    buf_send[3] = A_SENDER ^ UA;
     buf_send[4] = FLAG;
 
     int bytes = write(fd, buf_send, BUF_SIZE);
     printf("%d bytes written\n", bytes);
+
+    memdump(buf_send, 5);
+    printf("\n");
 
     // The while() cycle should be changed in order to respect the specifications
     // of the protocol indicated in the Lab guide
