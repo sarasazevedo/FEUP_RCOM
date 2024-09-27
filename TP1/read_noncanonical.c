@@ -21,11 +21,11 @@
 
 #define BUF_SIZE 5
 
-#define FLAG 0x7E
-#define A_SENDER 0x03
-#define A_RECEIVER 0x01
-#define UA 0x07
-#define SET 0x03
+void memdump (void *addr, size_t bytes) {
+    for (size_t i = 0; i < bytes; i++) {
+        printf("%02x ", *((char*) addr + i));
+    }
+}
 
 volatile int STOP = FALSE;
 
@@ -94,47 +94,56 @@ int main(int argc, char *argv[])
 
     printf("New termios structure set\n");
 
+
     // Loop for input
     unsigned char buf[BUF_SIZE + 1] = {0}; // +1: Save space for the final '\0' char
-
     while (STOP == FALSE)
     {
-        int bytes = read(fd,buf,BUF_SIZE);
-        printf("Flag = 0x%02X\n", buf[0]);
-        printf("Address = 0x%02X\n", buf[1]);
-        printf("Control = 0x%02X\n", buf[2]);
-        printf("BCC1 = 0x%02X\n", buf[3]);
-        printf("Flg = 0x%02X\n", buf[4]);
+        int bytes = read(fd, buf, BUF_SIZE);
 
-        if(buf[0] == FLAG && buf[1] == A_RECEIVER && buf[2] == SET && buf[3] == (A_RECEIVER ^ SET) && buf[4] == FLAG){
+        printf("Flag = 0x%02x\n", buf[0]);
+        printf("Adress = 0x%02x\n", buf[1]);
+        printf("Control = 0x%02x\n", buf[2]);
+        printf("BCC1 = 0x%02x\n", buf[3]);
+        printf("Flag #2 = 0x%02x\n\n", buf[4]);
+
+        if(buf[0] == 0x7E && buf[1] == 0x03 && buf[2] == 0x03 && buf[3] == 0x00 && buf[4] == 0x7E)
             STOP = TRUE;
-        }
 
-        // Returns after 5 chars have been input
-        //int bytes = read(fd, buf, BUF_SIZE);
-        //buf[bytes] = '\0'; // Set end of string to '\0', so we can printf
-
-        //printf(":%s:%d\n", buf, bytes);
-        //if (buf[0] == 'z')
-        //    STOP = TRUE;
     }
-
     sleep(1);
 
-    //Asnwer to receiver
-    
-    unsigned char buf_send[BUF_SIZE] = {0};
-    buf_send[0] = FLAG;
-    buf_send[1] = A_SENDER;
-    buf_send[2] = UA;
-    buf_send[3] = A_SENDER ^ UA;
-    buf_send[4] = FLAG;
+    // Answer to Receiver
 
-    int bytes = write(fd, buf_send, BUF_SIZE);
-    printf("%d bytes written\n", bytes);
+    unsigned char buf_answer[BUF_SIZE] = {0};
 
-    memdump(buf_send, 5);
+    unsigned char flag = 0x7E;
+    unsigned char control = 0x07;
+    unsigned char address = 0x03;
+    unsigned char bcc1 = control ^address;
+
+    buf_answer[0] = flag;
+    buf_answer[1] = address;
+    buf_answer[2] = control;
+    buf_answer[3] = bcc1;
+    buf_answer[4] = flag;
+
+    int bytes = write(fd, buf_answer, BUF_SIZE);
+    printf("%d bytes written to answer\n", bytes);
+
+    memdump(buf_answer, 5);
     printf("\n");
+
+    /*while (STOP == FALSE)
+    {
+        // Returns after 5 chars have been input
+        int bytes = read(fd, buf, BUF_SIZE);
+        buf[bytes] = '\0'; // Set end of string to '\0', so we can printf
+
+        printf(":%s:%d\n", buf, bytes);
+        if (buf[0] == 'z')
+            STOP = TRUE;
+    }*/
 
     // The while() cycle should be changed in order to respect the specifications
     // of the protocol indicated in the Lab guide
