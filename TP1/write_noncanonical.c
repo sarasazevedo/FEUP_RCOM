@@ -24,6 +24,8 @@
 volatile int STOP = FALSE;
 
 #define FLAG 0x7E
+#define ADRESS_SENDER 0x03
+#define ADRESS_RECEIVER 0x01
 #define SET 0x03
 #define UA 0x07
 
@@ -102,9 +104,9 @@ int main(int argc, char *argv[])
     unsigned char buf[BUF_SIZE] = {0};
 
     buf[0] = FLAG;
-    buf[1] = 0x03;
+    buf[1] = ADRESS_SENDER;
     buf[2] = SET;
-    buf[3] = buf[1] ^ buf[2];
+    buf[3] = ADRESS_SENDER ^ SET;
     buf[4] = FLAG;
 
         int bytes = write(fd, buf, 5);
@@ -118,7 +120,7 @@ int main(int argc, char *argv[])
         printf("UA frame received: ");
         memdump(buf, 5);
 
-        char expected[5] = {FLAG, 0x03, UA, 0x03 ^ UA, FLAG};
+        char expected[5] = {FLAG, ADRESS_SENDER, UA, ADRESS_SENDER ^ UA, FLAG};
         printf("Expected frame: ");
         for (size_t i = 0; i < 5; ++i)
             printf("%02x ", expected[i]);

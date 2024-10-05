@@ -19,6 +19,12 @@
 #define FALSE 0
 #define TRUE 1
 
+#define FLAG 0x7E
+#define ADRESS_SENDER 0x03
+#define ADRESS_RECEIVER 0x01
+#define SET 0x03
+#define UA 0x07
+
 #define BUF_SIZE 5
 
 void memdump (void *addr, size_t bytes) {
@@ -94,12 +100,16 @@ int main(int argc, char *argv[])
 
     printf("New termios structure set\n");
 
-
     // Loop for input
     unsigned char buf[BUF_SIZE + 1] = {0}; // +1: Save space for the final '\0' char
     while (STOP == FALSE)
     {
         int bytes = read(fd, buf, BUF_SIZE);
+
+        if(bytes < 0 || bytes > BUF_SIZE){
+            perror("read error");
+            break;
+        }
 
         printf("Flag = 0x%02x\n", buf[0]);
         printf("Adress = 0x%02x\n", buf[1]);
@@ -107,26 +117,23 @@ int main(int argc, char *argv[])
         printf("BCC1 = 0x%02x\n", buf[3]);
         printf("Flag #2 = 0x%02x\n\n", buf[4]);
 
-        if(buf[0] == 0x7E && buf[1] == 0x03 && buf[2] == 0x03 && buf[3] == 0x00 && buf[4] == 0x7E)
+        if(buf[0] == FLAG && buf[1] == ADRESS_SENDER && buf[2] == SET && buf[3] == (SET ^ ADRESS_SENDER) && buf[4] == FLAG)
+        {
             STOP = TRUE;
-
+        }
     }
+
     sleep(1);
 
     // Answer to Receiver
 
     unsigned char buf_answer[BUF_SIZE] = {0};
 
-    unsigned char flag = 0x7E;
-    unsigned char control = 0x07;
-    unsigned char address = 0x03;
-    unsigned char bcc1 = control ^address;
-
-    buf_answer[0] = flag;
-    buf_answer[1] = address;
-    buf_answer[2] = control;
-    buf_answer[3] = bcc1;
-    buf_answer[4] = flag;
+    buf_answer[0] = FLAG;
+    buf_answer[1] = UA;
+    buf_answer[2] = ADRESS_SENDER;
+    buf_answer[3] = UA ^ ADRESS_SENDER;
+    buf_answer[4] = FLAG;
 
     int bytes = write(fd, buf_answer, BUF_SIZE);
     printf("%d bytes written to answer\n", bytes);
