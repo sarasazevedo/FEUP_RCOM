@@ -33,7 +33,7 @@ typedef enum {
     A_RCV,
     C_RCV,
     BCC_OK,
-    STOP
+    STOP_
 } State;
 
 State state = START;
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 
     // Set input mode (non-canonical, no echo,...)
     newtio.c_lflag = 0;
-    newtio.c_cc[VTIME] = 10; // Inter-character timer unused
+    newtio.c_cc[VTIME] = 1; // Inter-character timer unused
     newtio.c_cc[VMIN] = 0;  // Blocking read until 5 chars received
 
     // VTIME e VMIN should be changed in order to protect with a
@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
 
             case BCC_OK:
                 if (byte == FLAG) {
-                    state = STOP;  // Received the frame
+                    state = STOP_;  // Received the frame
                 } else {
                     state = START;
                 }
@@ -178,9 +178,9 @@ int main(int argc, char *argv[])
     unsigned char buf_answer[BUF_SIZE] = {0};
 
     buf_answer[0] = FLAG;
-    buf_answer[1] = UA;
-    buf_answer[2] = ADRESS_SENDER;
-    buf_answer[3] = UA ^ ADRESS_SENDER;
+    buf_answer[1] = ADRESS_RECEIVER;
+    buf_answer[2] = UA;
+    buf_answer[3] = ADRESS_RECEIVER ^ UA;
     buf_answer[4] = FLAG;
 
     int bytes = write(fd, buf_answer, BUF_SIZE);

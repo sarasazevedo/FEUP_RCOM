@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
         printf("UA frame received: ");
         memdump(buf, 5);
 
-        char expected[5] = {FLAG, ADRESS_SENDER, UA, ADRESS_SENDER ^ UA, FLAG};
+        char expected[5] = {FLAG, ADRESS_RECEIVER, UA, ADRESS_RECEIVER ^ UA, FLAG};
         printf("Expected frame: ");
         for (size_t i = 0; i < 5; ++i)
             printf("%02x ", expected[i]);

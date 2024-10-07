@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
         printf("BCC1 = 0x%02x\n", buf[3]);
         printf("Flag #2 = 0x%02x\n\n", buf[4]);
 
-        if(buf[0] == FLAG && buf[1] == ADRESS_SENDER && buf[2] == SET && buf[3] == (SET ^ ADRESS_SENDER) && buf[4] == FLAG)
+        if(buf[0] == FLAG && buf[1] == ADRESS_SENDER && buf[2] == SET && buf[3] == (ADRESS_SENDER ^ SET) && buf[4] == FLAG)
         {
             STOP = TRUE;
         }
@@ -130,9 +130,9 @@ int main(int argc, char *argv[])
     unsigned char buf_answer[BUF_SIZE] = {0};
 
     buf_answer[0] = FLAG;
-    buf_answer[1] = UA;
-    buf_answer[2] = ADRESS_SENDER;
-    buf_answer[3] = UA ^ ADRESS_SENDER;
+    buf_answer[1] = ADRESS_RECEIVER;
+    buf_answer[2] = UA;
+    buf_answer[3] = ADRESS_RECEIVER ^ UA;
     buf_answer[4] = FLAG;
 
     int bytes = write(fd, buf_answer, BUF_SIZE);
